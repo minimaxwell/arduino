@@ -1,4 +1,4 @@
-arduino
-=======
+Arduino and Raspberry PI projects
+=================================
 
-My arduino projects
+My arduino and raspberry PI projects.
