@@ -1,7 +1,18 @@
-#define DELAY 3
-#define SLAVE_ADDRESS 0x04
+/*
+Matrix led multiplexer, ment to be implemented on an Atmel ATTiny45 microcontroller.
+Receives signals from I2C channel : DATA_CODE + data
+
+The DATA_CODE defines the length of the following data, and can represent either full frames for one or two colors, either coordinates of a point, or an instruction to load data from the built-in EEPROM memory ( not implemented yet )
+*/
+
+
 #include "TinyWireS.h"
 
+/* I2C configuration */
+#define DELAY 3
+#define SLAVE_ADDRESS 0x04
+
+/* data codes */
 #define DATA_NONE        0x00
 #define DATA_FULL_IMAGE  0x01
 #define DATA_RED_IMAGE   0x02
@@ -9,14 +20,18 @@
 #define DATA_POINT       0x04
 #define DATA_LOAD        0x05
 
+/* Shift registers configuration ( 3 shift registers are used on the board ) */
 int latchPin = 3;
 int clockPin = 4;
 int dataPin = 1;
+
 int nxt= 0;
 
 byte remaining_to_read = 0;
 byte current_data_type = 0;
 
+
+/* default image, displayed when no order have been received yet */
   byte dataRed[8] = {
 
     0b11111111,
