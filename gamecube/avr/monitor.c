@@ -93,16 +93,30 @@ void read_byte( uint8_t start_index, uint8_t *data ){
     *data = 0;
     for(i = 0; i < 8; ++i ){
         if( buffer[i+start_index] ){
-            *data |= 1 << 7-i;
+            *data |= 1 << (7-i);
         }
     }
 }
 
+void transfer_command(void){
+    uint8_t i, data;
+    // commande console -> manette
+    for(i = 0 ; i < 3 ; ++i){
+        read_byte(i*8, &data);
+        serie_putchar(data);
+    }
+
+    // commande manette -> console
+    // offset de 1 dans le premier bit de lecture ( stop bit de la commande precedente )
+    for( i = 3 ; i < 11; i++ ){
+        read_byte( i*8 + 1 , &data );
+        serie_putchar(data);
+    }
+
+}
+
 int main(void){
 
-    uint8_t i;
-    uint8_t data_buffer[11];
-    uint8_t data;
     cli();
 
     // parametrage du timer
@@ -126,20 +140,9 @@ int main(void){
             ;
         }
         cli();
-
-        serie_putchar('s');
-        // commande console -> manette
-        for(i = 0 ; i < 3 ; ++i){
-            read_byte(i*8, &data);
-            serie_putchar(data);
-        }
         
-        // commande manette -> console
-        // offset de 1 dans le premier bit de lecture ( stop bit de la commande precedente )
-        for( i = 3 ; i < 11; i++ ){
-            read_byte( i*8 + 1 , &data );
-            serie_putchar(data);
-        }
+        if(buff_index == 90)
+            transfer_command();
         
     }
 

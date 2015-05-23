@@ -29,7 +29,7 @@
 int main(int argc, char *argv[])
 {
   int fd, n, i, j;
-  uint8_t data[12];
+  uint8_t data[11];
   struct termios toptions;
 
   /* open serial port */
@@ -57,14 +57,14 @@ int main(int argc, char *argv[])
   j=0;
   while(1){ 
     /* Receive string from Arduino */
-    n = read(fd, data, 12);
+    n = read(fd, data, 11);
     if(n == -1){
         printf("Err!\n");
     }
     for(i = 0 ; i < n ; i++){
         j++;
         printf("%u ",(unsigned)data[i] );
-        if(j == 12){
+        if(j == 11){
             j=0;
             printf("\n");
         }
