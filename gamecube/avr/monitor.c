@@ -27,7 +27,7 @@
 
 // pour liaison serie
 #define F_CPU 16000000UL  // 16MHz
-#define BAUD 57600       // baudrate 115200
+#define BAUD 57600       // baudrate
 
 #include <util/setbaud.h>
 
@@ -116,7 +116,6 @@ int main(void){
 
     // parametrage de la liaison serie
     init_serie();
-    //serie_putchar('s');
 
     // listening mode
     while( 1 ){
@@ -142,12 +141,6 @@ int main(void){
             serie_putchar(data);
         }
         
-        //for( i = 0; i < buff_index ; ++i )
-        //    serie_putchar( buffer[i] );
-        //serie_putchar( data_buffer[0] );
-        //serie_putchar( buff_index );
-        //serie_putchar( data_buffer[1] );
-        //serie_putchar( data_buffer[2] );
     }
 
     // analyse de la commande
@@ -173,6 +166,5 @@ ISR( INT0_vect ){
     buffer[buff_index] = PIND & 0x04;
     ++buff_index;
     TCNT0 = 0;
-
 }
 
