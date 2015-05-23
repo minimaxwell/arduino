@@ -28,8 +28,8 @@
   
 int main(int argc, char *argv[])
 {
-  int fd, n, i;
-  uint8_t data[3];
+  int fd, n, i, j;
+  uint8_t data[12];
   struct termios toptions;
 
   /* open serial port */
@@ -54,14 +54,21 @@ int main(int argc, char *argv[])
   tcsetattr(fd, TCSANOW, &toptions);
   
   printf("Ready to read...\n");
-  
+  j=0;
   while(1){ 
     /* Receive string from Arduino */
-    n = read(fd, data, 1);
+    n = read(fd, data, 12);
     if(n == -1){
         printf("Err!\n");
     }
-    printf("%u\n",(unsigned)data[0] );
+    for(i = 0 ; i < n ; i++){
+        j++;
+        printf("%u ",(unsigned)data[i] );
+        if(j == 12){
+            j=0;
+            printf("\n");
+        }
+    }
   }
 
  

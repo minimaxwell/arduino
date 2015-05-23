@@ -64,6 +64,13 @@ void init_it(void){
 
 }
 
+void init_pins(void){
+    // PIN 2 port D
+    PORTD &= ~(_BV(PD2)); // pas de pullup
+    DDRD &= ~(_BV(PD2)); // input
+
+}
+
 void init_serie(void){
     //
     // definition de la vitesse
@@ -84,9 +91,9 @@ void init_serie(void){
 void read_byte( uint8_t start_index, uint8_t *data ){
     uint8_t i;
     *data = 0;
-    for(i = 0; i <= 14 ; i += 2 ){
-        if( buffer[start_index + i + 1] > buffer[start_index + i] ){
-            *data |= 1 << (i / 2);
+    for(i = 0; i < 8; ++i ){
+        if( buffer[i+start_index] ){
+            *data |= 1 << 7-i;
         }
     }
 }
@@ -95,6 +102,7 @@ int main(void){
 
     uint8_t i;
     uint8_t data_buffer[11];
+    uint8_t data;
     cli();
 
     // parametrage du timer
@@ -102,6 +110,9 @@ int main(void){
 
     // parametrage des IT externes
     init_it();
+
+    // parametrage des pins en input
+    init_pins();
 
     // parametrage de la liaison serie
     init_serie();
@@ -116,18 +127,27 @@ int main(void){
             ;
         }
         cli();
-       /* 
-        if( buff_index > 170 ){
-            read_byte( 1, &data_buffer[0] );
-            read_byte( 17, &data_buffer[1] );
-            read_byte( 33, &data_buffer[2] );
-        }*/
+
+        serie_putchar('s');
+        // commande console -> manette
+        for(i = 0 ; i < 3 ; ++i){
+            read_byte(i*8, &data);
+            serie_putchar(data);
+        }
+        
+        // commande manette -> console
+        // offset de 1 dans le premier bit de lecture ( stop bit de la commande precedente )
+        for( i = 3 ; i < 11; i++ ){
+            read_byte( i*8 + 1 , &data );
+            serie_putchar(data);
+        }
+        
         //for( i = 0; i < buff_index ; ++i )
         //    serie_putchar( buffer[i] );
         //serie_putchar( data_buffer[0] );
-        serie_putchar( buff_index );
-     //   serie_putchar( data_buffer[1] );
-     //   serie_putchar( data_buffer[2] );
+        //serie_putchar( buff_index );
+        //serie_putchar( data_buffer[1] );
+        //serie_putchar( data_buffer[2] );
     }
 
     // analyse de la commande
@@ -147,50 +167,10 @@ ISR( TIMER0_OVF_vect ){
 
 /**
  * ISR declenchee lors d'un edge sur la ligne d'IT 0 ( port 0 GC, pin 2 arduino )
- * Mode naked : on enleve le prologue et l'epilogue ASM générés par avr-gcc.
- * Le traitement de cette IT doit se faire en envirron 1 microseconde == 16 cycles
- * Sachant qu'il y a un délai incompressible de 4 cycles avant et après l'ISR.
- * En pratique, on peut aller un peu au dessus, 20 cycles semble une limite acceptable.
- */
-/*
-ISR( INT0_vect, ISR_NAKED){
-   asm volatile(
-//   " push r1                    \n"
-//   " push r0                    \n"
-   " in r0,__SREG__             \n"
-//   " push r0                    \n"
-   " clr __zero_reg__           \n"
-//   " push r24                   \n"
-   " push r30                   \n"
-   " push r31                   \n"
-".L__stack_usage = 6             \n"
-   " lds r30,buff_index         \n"
-   " ldi r31,0                  \n"
-   " in r23,0x26                \n"
-   " subi r30,lo8(-(buffer))    \n"
-   " sbci r31,hi8(-(buffer))    \n"
-   " st Z,r23                   \n"
-   " lds r23,buff_index         \n"
-   " subi r23,lo8(-(1))         \n"
-   " sts buff_index,r23         \n"
-   " out 0x26,__zero_reg__      \n"
-   " pop r31                    \n"
-   " pop r30                    \n"
-//   " pop r24                    \n"
-//   " pop r0                     \n"
-   " out __SREG__,r0            \n"
-//   " pop r0                     \n"
-//   " pop r1                     \n"
-   " reti                       \n"
- 
-   );
-   //buffer[buff_index] = TCNT0;
-   //++buff_index;
-   //TCNT0 = 0;
-}*/
+*/
 
 ISR( INT0_vect ){
-    buffer[buff_index] = TCNT0;
+    buffer[buff_index] = PIND & 0x04;
     ++buff_index;
     TCNT0 = 0;
 
