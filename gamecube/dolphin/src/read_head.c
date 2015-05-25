@@ -10,16 +10,17 @@ int main( int argc, char **argv ){
         return -1;
     }
 
-    t_dtm_header *head;
-    head = read_header_from_dump( argv[1] );
+    t_dtm_header *head = NULL;
+    head = dtm_read_header_from_dump( argv[1] );
     if( head == NULL){
         printf("erreur à la construction du header\n");
         return -2;
     }
 
-    print_header_infos( head );
+    dtm_print_header_infos( head );
 
     free(head);
 
+    dtm_print_inputs( argv[1] );
     return 0;
 }

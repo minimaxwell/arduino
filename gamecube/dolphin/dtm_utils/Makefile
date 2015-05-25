@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall -Wextra -Iinclude 
+CFLAGS=-Wall -Wextra -Iinclude -g
 
 
 LIB_DTM=dtm
